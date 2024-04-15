@@ -1,15 +1,15 @@
 import glob
 import matplotlib.pyplot as plt
-
+import cv2
 """
 第一部分：图片的展示，不包括图片
 """
 
 
 # 展示单一图片
-def show_image(image):
-    plt.imshow(image)
-    plt.show()
+def show_image(image,name='img'):
+    cv2.imshow('img', image)
+    cv2.waitKey(0)
 
 
 # 辅助显示若干图片

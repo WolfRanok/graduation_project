@@ -1,104 +1,69 @@
 import os
 import cv2
-
-from mian import LaneLine_process
+from moviepy.editor import ImageSequenceClip
 
 """
 第五部分：独立部分，视频的处理
 """
+read_url = r"E:\python\githubWork\graduation_project\test_videos\challenge.mp4"  # 输入视频文件路径
+video_analysis_url = r'E:\python\githubWork\graduation_project\video_analysis'  # 暂存视频帧图片
+video_save = r'E:\python\githubWork\graduation_project\new_videos'  # 保存视频的路径
 
 
-# 返回所有mp4文件路径
-def get_mp4_files(directory=r'test_videos'):
-    mp4_files = []
-    for root, dirs, files in os.walk(directory):
+def delete_all(url=video_analysis_url):
+    """
+    删除文件夹下所有文件
+    :param url: 文件目录
+    :return: None
+    """
+    for root, dirs, files in os.walk(url):
         for file in files:
-            if file.endswith('.mp4'):
-                mp4_files.append(os.path.join(root, file))
-    return mp4_files
+            os.remove(os.path.join(root, file))
 
 
-def split_video_into_images(video_path, output_dir='decompose',is_write=False):
+def analysis(read_url=read_url, video_analysis_url=video_analysis_url, mod=1):
     """
-    将视频拆分成图片并保存到指定目录中，返回一个包含所有图片的列表。
-
-    参数:
-        video_path (str): 视频文件路径
-        output_dir (str): 输出目录路径
-    返回:
-        list: 包含所有图片的列表
+    用于将视频文件，按帧处理成图片集
+    :param read_url: 原视频的路径
+    :param video_analysis_url:视频帧的存放路径
+    :param mod: 提取的视频的帧数间隔
+    :return: None
     """
-    # 打开视频文件
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(read_url)
+    name_num = 0  # 记录名字的序号
+    i = 0
 
-    # 获取视频帧率、帧宽度和帧高度
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    # 创建输出目录（如果不存在）
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # 逐帧读取视频并保存为图片，将图片添加到列表中
-    frame_count = 0
-    image_list = []
-
+    delete_all()  # 清空中间文件夹下的文件
     while cap.isOpened():
+        i += 1
         ret, frame = cap.read()
-        if not ret:
+        name_num += 1
+
+        name = str(name_num)
+        if ret:
+            if i % mod == 0:  # 每隔mod帧保存一张图片
+                cv2.imwrite(video_analysis_url + '\\' + name + '.jpg', frame)
+        else:
             break
-        output_file = os.path.join(output_dir, f'frame_{frame_count}.jpg')
-        if is_write:
-            cv2.imwrite(output_file, frame)
-        image_list.append(frame)
-        frame_count += 1
-
-    # 释放视频文件对象
     cap.release()
-    return image_list
 
 
-# 清空decompose下的所有图片
-def delete_files_in_directory(directory=r'decompose'):
-    for filename in os.listdir(directory):
-        file_path = os.path.join(directory, filename)
-        try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-        except Exception as e:
-            print(f"Error deleting file {file_path}: {e}")
+def compound(image_url=video_analysis_url, save_video_url=video_save,fps=24):
+    """
+    将图像帧转换成视频
+    :param image_url: 图像帧的路径
+    :param save_video_url: 保存视频的路径
+    :param fps: 每秒的帧数
+    :return: None
+    """
+    files = os.listdir(image_url)
+    out_num = len(files)
+    image_paths = [rf'{image_url}\{i}.jpg' for i in range(1,out_num)]
+
+    clip = ImageSequenceClip(image_paths,fps=fps)   # 读入图片
+    clip.write_videofile(save_video_url + '\\' + 'test.mp4')    # 保存视频文件
 
 
-# delete_files_in_directory() # 先清空图片
-# frames = split_video_into_images(video_paths[1]) # 这里先处理一个视频
-# split_video_into_images(video_paths[1]) # 这里先处理一个视频
 
-# 返回decompose下的所有jpg文件路径
-def get_jpg_files(directory=r'decompose'):
-    mp4_files = []
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith('.jpg'):
-                mp4_files.append(os.path.join(root, file))
-    return mp4_files
-
-
-def ndarray_list_to_video(frames, output_path=r'new_videos/1.mp4'):
-    # frames是一个图片列表
-    height, width, layers = frames[0].shape
-
-    # 创建视频编码器
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video = cv2.VideoWriter(output_path, fourcc, 30, (width, height))
-
-    # 逐帧将图片写入视频
-    for image in frames:
-        video.write(image)
-
-    # 释放资源
-    cv2.destroyAllWindows()
-    video.release()
-
-# output_path = '1.mp4'
-# ndarray_list_to_video(frames, output_path)
+if __name__ == '__main__':
+    compound()

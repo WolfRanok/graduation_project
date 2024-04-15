@@ -1,0 +1,9 @@
+path: E:\python\githubWork\graduation_project\yolov8\data
+train: images\train   # 训练集
+val: images\train       # 测试集
+
+# 检测器显示的名称
+names:
+  0: human
+  1: car
+  2: truck

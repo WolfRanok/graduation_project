@@ -49,6 +49,8 @@ def detect_lane_lines(image):
 
 # 车道线合理性判断，以斜率把一个图片的线分为两类，一类是左边的线，一类是右边的线。
 def average_slope_intercept(lines):
+    if lines is None:
+        return None
     left_lines = []  # (slope, intercept)   斜率、截距 y = ax + b
     left_weights = []  # (length,)
     right_lines = []  # (slope, intercept)
@@ -68,7 +70,7 @@ def average_slope_intercept(lines):
                 left_lines.append((slope, intercept))
                 left_weights.append(length)
 
-    # add more weight to longer lines
+    # 增加线条的权重
     left_lane = np.dot(left_weights, left_lines) / np.sum(left_weights) if len(left_weights) > 0 else None
     right_lane = np.dot(right_weights, right_lines) / np.sum(right_weights) if len(right_weights) > 0 else None
 
@@ -93,6 +95,8 @@ def make_line_points(y1, y2, line):
 
 # 车道线检测函数-根据直线的斜率延长车道线的长度
 def lane_lines(image, lines):
+    if lines is None:
+        return []
     left_lane, right_lane = average_slope_intercept(lines)
     y1 = image.shape[0]  # bottom of image
     y2 = y1 * 0.6

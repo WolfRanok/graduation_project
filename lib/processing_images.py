@@ -12,20 +12,20 @@ def convert_gray_scale(image):
     return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
 
-# gray_images = list(map(convert_gray_scale, white_yello_images))
-# show_images(gray_images)
 # 滤波去噪
 def apply_smooothing(image, ksize=15):
     return cv2.GaussianBlur(image, (ksize, ksize), 0)
 
 
-# blured_images = list(map(apply_smooothing, gray_images))
-# show_images(blured_images)
+# 二值化
+def image_threshold(image):
+    _, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+    return binary
 
 
 # 边缘检测
-def detect_edges(image, low_thresh=50, high_thresh=150):
-    return cv2.Canny(image, low_thresh, high_thresh)
+def detect_edges(image, low=50, high=150):
+    return cv2.Canny(image, low, high)
 
 
 # edge_images = list(map(detect_edges, blured_images))
